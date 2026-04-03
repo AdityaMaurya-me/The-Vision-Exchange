@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -27,7 +29,7 @@ export default async function ProfilePage() {
       {/* Profile Header */}
       <div className="mb-10">
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 rounded-full bg-linear-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-2xl font-bold text-white">
+          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-2xl font-bold text-white">
             {profile?.username?.[0]?.toUpperCase() ?? '?'}
           </div>
           <div>
@@ -41,9 +43,7 @@ export default async function ProfilePage() {
           Member since{' '}
           {profile?.created_at
             ? new Date(profile.created_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
+                year: 'numeric', month: 'long', day: 'numeric',
               })
             : 'recently'}
         </p>
@@ -53,9 +53,7 @@ export default async function ProfilePage() {
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
         <Card className="bg-slate-900 border-slate-800">
           <CardContent className="pt-6 text-center">
-            <p className="text-3xl font-bold text-violet-400">
-              {samples?.length ?? 0}
-            </p>
+            <p className="text-3xl font-bold text-violet-400">{samples?.length ?? 0}</p>
             <p className="text-slate-400 text-sm mt-1">Samples Shared</p>
           </CardContent>
         </Card>
@@ -69,57 +67,34 @@ export default async function ProfilePage() {
         </Card>
       </div>
 
-      {/* Submitted Samples */}
-      <div>
-        <h2 className="text-xl font-semibold text-slate-100 mb-4">
-          Your Submitted Samples
-        </h2>
-
-        {samples && samples.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {samples.map((sample) => (
-              <Card key={sample.id} className="bg-slate-900 border-slate-800 overflow-hidden">
-                <img
-                  src={sample.image_url}
-                  alt="Sample photo"
-                  className="w-full h-48 object-cover"
-                />
-                <CardContent className="pt-4">
-                  <p className="font-medium text-slate-100">
-                    {sample.gear?.brand} {sample.gear?.model}
-                  </p>
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {sample.settings_aperture && (
-                      <Badge variant="outline" className="border-slate-700 text-slate-400 text-xs">
-                        f/{sample.settings_aperture}
-                      </Badge>
-                    )}
-                    {sample.settings_shutter && (
-                      <Badge variant="outline" className="border-slate-700 text-slate-400 text-xs">
-                        {sample.settings_shutter}s
-                      </Badge>
-                    )}
-                    {sample.settings_iso && (
-                      <Badge variant="outline" className="border-slate-700 text-slate-400 text-xs">
-                        ISO {sample.settings_iso}
-                      </Badge>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        ) : (
-          <Card className="bg-slate-900 border-slate-800 border-dashed">
-            <CardContent className="py-12 text-center">
-              <p className="text-slate-500">No samples yet.</p>
-              <p className="text-slate-600 text-sm mt-1">
-                Upload your first photo in the Gear Gallery.
-              </p>
-            </CardContent>
-          </Card>
-        )}
+      {/* Samples Section Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-slate-100">Your Submitted Samples</h2>
+        <Button asChild className="bg-violet-600 hover:bg-violet-700">
+          <Link href="/upload">+ Upload Sample</Link>
+        </Button>
       </div>
+
+      {/* Samples Grid */}
+      {samples && samples.length > 0 ? (
+        <SamplesGrid samples={samples} />
+      ) : (
+        <Card className="bg-slate-900 border-slate-800 border-dashed">
+          <CardContent className="py-12 text-center">
+            <p className="text-4xl mb-3">📷</p>
+            <p className="text-slate-500">No samples yet.</p>
+            <p className="text-slate-600 text-sm mt-1 mb-4">
+              Upload your first photo to get started.
+            </p>
+            <Button asChild className="bg-violet-600 hover:bg-violet-700">
+              <Link href="/upload">Upload Your First Sample</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
+
+// Separate client component for delete functionality
+import SamplesGrid from '@/components/samples-grid'
