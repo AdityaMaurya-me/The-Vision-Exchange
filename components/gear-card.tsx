@@ -16,7 +16,8 @@ export default function GearCard({ gear }: { gear: Gear }) {
   return (
     <Link href={`/gear/${gear.id}`}>
       <Card className="bg-slate-900 border-slate-800 hover:border-violet-500 transition-all duration-200 overflow-hidden group cursor-pointer h-full">
-        {/* Gear Image */}
+
+        {/* Image */}
         <div className="relative h-48 overflow-hidden bg-slate-800">
           <img
             src={gear.image_url || 'https://placehold.co/600x400/1e293b/94a3b8?text=No+Image'}
@@ -36,7 +37,7 @@ export default function GearCard({ gear }: { gear: Gear }) {
           </div>
         </div>
 
-        {/* Gear Info */}
+        {/* Info */}
         <CardContent className="pt-4 pb-5">
           <p className="text-xs text-slate-500 uppercase tracking-widest mb-1">
             {gear.brand}
@@ -45,8 +46,8 @@ export default function GearCard({ gear }: { gear: Gear }) {
             {gear.model}
           </h3>
 
-          {/* Creative Tags */}
-          <div className="flex flex-wrap gap-1.5 mb-4">
+          {/* Creative Tags — the hero, not price */}
+          <div className="flex flex-wrap gap-1.5 mb-3">
             {gear.creative_tags?.slice(0, 3).map((tag) => (
               <Badge
                 key={tag}
@@ -58,9 +59,9 @@ export default function GearCard({ gear }: { gear: Gear }) {
             ))}
           </div>
 
-          {/* Price */}
-          <p className="text-violet-400 font-semibold text-base">
-            ${gear.price_estimate?.toLocaleString()}
+          {/* Price — subtle, not dominant */}
+          <p className="text-slate-500 text-xs mt-auto">
+            est. ${gear.price_estimate?.toLocaleString()}
           </p>
         </CardContent>
       </Card>

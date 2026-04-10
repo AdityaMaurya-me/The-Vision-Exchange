@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import SamplesGrid from '@/components/samples-grid'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
@@ -23,78 +22,87 @@ export default async function ProfilePage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
+  const { data: followersData } = await supabase
+    .from('follows')
+    .select('id')
+    .eq('following_id', user.id)
+
+  const { data: followingData } = await supabase
+    .from('follows')
+    .select('id')
+    .eq('follower_id', user.id)
+
+  const followerCount = followersData?.length ?? 0
+  const followingCount = followingData?.length ?? 0
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-12">
+    <div className="max-w-5xl mx-auto px-4 py-12">
 
       {/* Profile Header */}
-      <div className="mb-10">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-2xl font-bold text-white">
-            {profile?.username?.[0]?.toUpperCase() ?? '?'}
+      <div className="flex flex-col md:flex-row md:items-start gap-6 mb-10">
+
+        {/* Avatar */}
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-3xl font-bold text-white shrink-0">
+          {profile?.username?.[0]?.toUpperCase() ?? '?'}
+        </div>
+
+        {/* Info */}
+        <div className="flex-1">
+          <div className="flex items-start justify-between flex-wrap gap-4 mb-2">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-100">
+                {profile?.username ?? 'Photographer'}
+              </h1>
+              {profile?.creative_style && (
+                <span className="inline-block mt-1 px-3 py-0.5 rounded-full text-xs font-medium bg-violet-600/20 text-violet-300 border border-violet-700">
+                  {profile.creative_style}
+                </span>
+              )}
+            </div>
+            <Button asChild className="bg-violet-600 hover:bg-violet-700">
+              <Link href="/upload">+ Upload Shot</Link>
+            </Button>
           </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-100">
-              {profile?.username ?? 'Photographer'}
-            </h1>
-            <p className="text-slate-400">{profile?.creative_profile ?? 'Member'}</p>
+
+          {/* Stats row */}
+          <div className="flex gap-6 mt-4 text-sm">
+            <div className="text-center">
+              <p className="text-xl font-bold text-slate-100">{samples?.length ?? 0}</p>
+              <p className="text-slate-500 text-xs">Shots</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-slate-100">{followerCount}</p>
+              <p className="text-slate-500 text-xs">Followers</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-slate-100">{followingCount}</p>
+              <p className="text-slate-500 text-xs">Following</p>
+            </div>
+            <div className="text-center">
+              <p className="text-xl font-bold text-slate-100">
+                {new Set(samples?.map(s => s.gear_id)).size ?? 0}
+              </p>
+              <p className="text-slate-500 text-xs">Gear Used</p>
+            </div>
           </div>
         </div>
-        <p className="text-slate-500 text-sm">
-          Member since{' '}
-          {profile?.created_at
-            ? new Date(profile.created_at).toLocaleDateString('en-US', {
-                year: 'numeric', month: 'long', day: 'numeric',
-              })
-            : 'recently'}
-        </p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-10">
-        <Card className="bg-slate-900 border-slate-800">
-          <CardContent className="pt-6 text-center">
-            <p className="text-3xl font-bold text-violet-400">{samples?.length ?? 0}</p>
-            <p className="text-slate-400 text-sm mt-1">Samples Shared</p>
-          </CardContent>
-        </Card>
-        <Card className="bg-slate-900 border-slate-800">
-          <CardContent className="pt-6 text-center">
-            <p className="text-3xl font-bold text-cyan-400">
-              {new Set(samples?.map((s) => s.gear_id)).size ?? 0}
-            </p>
-            <p className="text-slate-400 text-sm mt-1">Gear Used</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Samples Section Header */}
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-slate-100">Your Submitted Samples</h2>
-        <Button asChild className="bg-violet-600 hover:bg-violet-700">
-          <Link href="/upload">+ Upload Sample</Link>
-        </Button>
-      </div>
-
-      {/* Samples Grid */}
+      {/* Portfolio Grid */}
       {samples && samples.length > 0 ? (
         <SamplesGrid samples={samples} />
       ) : (
-        <Card className="bg-slate-900 border-slate-800 border-dashed">
-          <CardContent className="py-12 text-center">
-            <p className="text-4xl mb-3">📷</p>
-            <p className="text-slate-500">No samples yet.</p>
-            <p className="text-slate-600 text-sm mt-1 mb-4">
-              Upload your first photo to get started.
-            </p>
-            <Button asChild className="bg-violet-600 hover:bg-violet-700">
-              <Link href="/upload">Upload Your First Sample</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border-2 border-dashed border-slate-800 py-20 text-center">
+          <p className="text-4xl mb-3">📷</p>
+          <p className="text-slate-400 font-medium mb-1">No shots yet</p>
+          <p className="text-slate-600 text-sm mb-6">
+            Upload your first photo to start your portfolio.
+          </p>
+          <Button asChild className="bg-violet-600 hover:bg-violet-700">
+            <Link href="/upload">Upload Your First Shot</Link>
+          </Button>
+        </div>
       )}
     </div>
   )
 }
-
-// Separate client component for delete functionality
-import SamplesGrid from '@/components/samples-grid'

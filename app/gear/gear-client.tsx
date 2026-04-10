@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from 'react'
 import GearCard from '@/components/gear-card'
-import TagFilter from '@/components/tag-filter'
 import VibeMatcher from '@/components/vibe-matcher'
 
 type Gear = {
@@ -18,12 +17,6 @@ type Gear = {
 export default function GearClient({ initialGear }: { initialGear: Gear[] }) {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [typeFilter, setTypeFilter] = useState<'all' | 'body' | 'lens'>('all')
-
-  const handleTagToggle = (tag: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    )
-  }
 
   const handleVibeSelect = (tags: string[]) => {
     setSelectedTags(tags)
@@ -46,55 +39,49 @@ export default function GearClient({ initialGear }: { initialGear: Gear[] }) {
       <div className="mb-10">
         <h1 className="text-4xl font-bold text-slate-100 mb-2">Gear Gallery</h1>
         <p className="text-slate-400">
-          Browse {initialGear.length} pieces of gear mapped to creative use cases.
+          {initialGear.length} pieces of gear mapped to creative use cases.
         </p>
       </div>
 
-      {/* Vibe Matcher */}
+      {/* Vibe Matcher — the only filter */}
       <div className="mb-10">
         <VibeMatcher onVibeSelect={handleVibeSelect} />
       </div>
 
-      {/* Filters */}
-      <div id="gear-grid" className="mb-6 space-y-4">
-        {/* Type Filter */}
-        <div className="flex items-center gap-3">
-          <span className="text-slate-400 text-sm">Type:</span>
-          {(['all', 'body', 'lens'] as const).map((type) => (
-            <button
-              key={type}
-              onClick={() => setTypeFilter(type)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all capitalize ${
-                typeFilter === type
-                  ? 'bg-violet-600 border-violet-500 text-white'
-                  : 'bg-transparent border-slate-700 text-slate-400 hover:border-violet-500 hover:text-slate-200'
-              }`}
-            >
-              {type === 'all' ? 'All Gear' : type === 'body' ? 'Camera Bodies' : 'Lenses'}
-            </button>
-          ))}
-        </div>
+      {/* Type Filter — minimal, just body/lens */}
+      <div id="gear-grid" className="flex items-center gap-3 mb-8">
+        <span className="text-slate-500 text-sm">Show:</span>
+        {(['all', 'body', 'lens'] as const).map((type) => (
+          <button
+            key={type}
+            onClick={() => setTypeFilter(type)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium border transition-all ${
+              typeFilter === type
+                ? 'bg-violet-600 border-violet-500 text-white'
+                : 'bg-transparent border-slate-700 text-slate-400 hover:border-violet-500 hover:text-slate-200'
+            }`}
+          >
+            {type === 'all' ? 'All' : type === 'body' ? 'Camera Bodies' : 'Lenses'}
+          </button>
+        ))}
 
-        {/* Tag Filter */}
-        <TagFilter
-          selectedTags={selectedTags}
-          onTagToggle={handleTagToggle}
-          onClearAll={() => setSelectedTags([])}
-        />
-      </div>
-
-      {/* Results Count */}
-      <div className="mb-6 flex items-center justify-between">
-        <p className="text-slate-500 text-sm">
-          Showing{' '}
-          <span className="text-slate-300 font-medium">{filteredGear.length}</span>{' '}
-          of {initialGear.length} items
-          {selectedTags.length > 0 && (
-            <span className="text-violet-400 ml-1">
-              — filtered by {selectedTags.length} tag{selectedTags.length > 1 ? 's' : ''}
+        {/* Active vibe indicator */}
+        {selectedTags.length > 0 && (
+          <div className="ml-auto flex items-center gap-2">
+            <span className="text-violet-400 text-sm">
+              {filteredGear.length} results for{' '}
+              <span className="font-medium">
+                {selectedTags.join(', ')}
+              </span>
             </span>
-          )}
-        </p>
+            <button
+              onClick={() => setSelectedTags([])}
+              className="text-slate-500 hover:text-red-400 text-xs underline transition-colors"
+            >
+              Clear
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Gear Grid */}
@@ -107,13 +94,13 @@ export default function GearClient({ initialGear }: { initialGear: Gear[] }) {
       ) : (
         <div className="text-center py-20">
           <p className="text-5xl mb-4">🔍</p>
-          <p className="text-slate-400 text-lg mb-2">No gear matches your filters.</p>
-          <p className="text-slate-600 text-sm">Try selecting different tags or clearing your filters.</p>
+          <p className="text-slate-400 text-lg mb-2">No gear matches your vibe.</p>
+          <p className="text-slate-600 text-sm">Try a different combination.</p>
           <button
             onClick={() => { setSelectedTags([]); setTypeFilter('all') }}
             className="mt-4 text-violet-400 hover:underline text-sm"
           >
-            Clear all filters
+            Clear filters
           </button>
         </div>
       )}

@@ -45,15 +45,18 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
-          {/* Logo */}
-          <Link href="/" className="font-bold text-xl tracking-tight">
+          {/* Logo — not clickable */}
+          <span className="font-bold text-xl tracking-tight select-none cursor-default">
             <span className="text-transparent bg-clip-text bg-linear-to-r from-violet-400 to-cyan-400">
               VisionX
             </span>
-          </Link>
+          </span>
 
           {/* Nav Links */}
           <div className="hidden md:flex items-center gap-6 text-sm text-slate-400">
+            <Link href="/" className="hover:text-slate-100 transition-colors">
+              Home
+            </Link>
             <Link href="/gear" className="hover:text-slate-100 transition-colors">
               Gear Gallery
             </Link>
@@ -61,22 +64,25 @@ export default function Navbar() {
               Vibe Matcher
             </Link>
             {!loading && user && (
-              <Link href="/profile" className="hover:text-slate-100 transition-colors">
-                My Profile
-              </Link>
+              <>
+                <Link href="/feed" className="hover:text-slate-100 transition-colors">
+                  Feed
+                </Link>
+                <Link href="/profile" className="hover:text-slate-100 transition-colors">
+                  My Profile
+                </Link>
+              </>
             )}
           </div>
 
           {/* Auth Section */}
           <div className="flex items-center gap-3 min-w-35 justify-end">
             {loading ? (
-              // Loading skeleton — prevents layout shift
               <>
                 <div className="w-16 h-8 bg-slate-800 rounded-md animate-pulse" />
                 <div className="w-20 h-8 bg-slate-800 rounded-md animate-pulse" />
               </>
             ) : user ? (
-              // Logged in state
               <>
                 <span className="text-slate-400 text-sm hidden md:block truncate max-w-37.5">
                   {user.email}
@@ -91,7 +97,6 @@ export default function Navbar() {
                 </Button>
               </>
             ) : (
-              // Logged out state
               <>
                 <Button
                   asChild
